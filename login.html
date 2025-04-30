@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="gu" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>લોગિન - શ્રી પી. એમ. પટેલ હાઇસ્કૂલ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: 'Noto Sans Gujarati', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .btn {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border: none;
+      background: #1a5276;
+      color: white;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .loader {
+      display: none;
+      margin: 1rem auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1a5276;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ગૂગલ સાથે લોગિન કરો</h2>
+    <button class="btn" onclick="googleSignIn()">ગૂગલ સાથે લોગિન કરો</button>
+    <div class="loader" id="loader"></div>
+    <p id="message"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyALJ8xG21RcevPI2Le_3tohfu-M2gW8szc",
+      authDomain: "pm-patel-high-school.firebaseapp.com",
+      databaseURL: "https://pm-patel-high-school-default-rtdb.firebaseio.com",
+      projectId: "pm-patel-high-school",
+      storageBucket: "pm-patel-high-school.appspot.com",
+      messagingSenderId: "334539397246",
+      appId: "1:334539397246:web:8c6a67a82e2380f9a6202f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    window.googleSignIn = async () => {
+      const loader = document.getElementById('loader');
+      const msg = document.getElementById('message');
+      loader.style.display = 'block';
+      msg.textContent = '';
+
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        // Save to Realtime Database under /users/uid
+        await set(ref(db, 'users/' + user.uid), {
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          lastLogin: new Date().toISOString()
+        });
+
+        sessionStorage.setItem('user', JSON.stringify(user));
+        sessionStorage.setItem('lastActivity', Date.now());
+
+        msg.textContent = 'લોગિન સફળ થયો!';
+        loader.style.display = 'none';
+
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+
+      } catch (err) {
+        msg.textContent = 'લોગિનમાં ભૂલ: ' + err.message;
+        loader.style.display = 'none';
+      }
+    };
+
+    function logout() {
+      const auth = getAuth();
+      signOut(auth).then(() => {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error("Error logging out: ", error);
+      });
+    }
+
+    // Add event listener to logout button
+    const logoutButton = document.querySelector('.logout-btn');
+    if (logoutButton) {
+      logoutButton.addEventListener('click', logout);
+    }
+  </script>
+</body>
+</html>

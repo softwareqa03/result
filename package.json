@@ -1,0 +1,17 @@
+{
+  "name": "pm-patel-high-school",
+  "version": "1.0.0",
+  "description": "શ્રી પી. એમ. પટેલ હાઇસ્કૂલ માટે વાર્ષિક પરીક્ષા સિસ્ટમ",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.3"
+  },
+  "dependencies": {
+    "firebase": "^11.6.1",
+    "vite-plugin-node-polyfills": "^0.23.0"
+  }
+}

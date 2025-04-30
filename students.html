@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="gu" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>વિદ્યાર્થી યાદી</title>
+  <style>
+    body {
+      font-family: 'Noto Sans Gujarati', 'Shruti', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 2rem;
+    }
+    h2 {
+      text-align: center;
+      color: #1a5276;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: right;
+    }
+    th {
+      background: #1a5276;
+      color: white;
+    }
+    .btn {
+      margin: 1rem 0;
+      padding: 0.5rem 1rem;
+      background: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>વિદ્યાર્થી યાદી</h2>
+  <button class="btn" onclick="logout()">લોગઆઉટ</button>
+  <table>
+    <thead>
+      <tr>
+        <th>નામ</th>
+        <th>ધોરણ</th>
+        <th>ફોન</th>
+      </tr>
+    </thead>
+    <tbody id="student-list"></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { firebaseConfig } from "./firebaseConfig.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    const lastActivity = sessionStorage.getItem('lastActivity');
+    const timeout = 30 * 60 * 1000;
+
+    const validateSession = () => {
+      if (!user || !lastActivity || Date.now() - lastActivity > timeout) {
+        sessionStorage.clear();
+        window.location.assign("login.html");
+      }
+    };
+
+    const loadStudents = async () => {
+      const tbody = document.getElementById("student-list");
+      const snapshot = await getDocs(collection(db, "students"));
+      snapshot.forEach(doc => {
+        const student = doc.data();
+        const row = `<tr>
+          <td>${student.name}</td>
+          <td>${student.standard}</td>
+          <td>${student.phone}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    };
+
+    window.logout = () => {
+      sessionStorage.clear();
+      window.location.assign("login.html");
+    };
+
+    window.addEventListener('click', () => sessionStorage.setItem('lastActivity', Date.now()));
+    window.addEventListener('keydown', () => sessionStorage.setItem('lastActivity', Date.now()));
+
+    validateSession();
+    loadStudents();
+  </script>
+</body>
+</html>

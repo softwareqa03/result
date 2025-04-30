@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="gu" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>શિક્ષક ઉમેરો - શ્રી પી. એમ. પટેલ હાઈસ્કૂલ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Gujarati', sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    .logout-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    .footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>શિક્ષક ઉમેરો</h1>
+    <button class="logout-btn" onclick="logout()">લોગઆઉટ</button>
+  </header>
+
+  <main>
+    <h3>શિક્ષક માહિતી ઉમેરો</h3>
+    <div class="form-group">
+      <input type="text" id="teacherName" placeholder="શિક્ષક નામ" required>
+    </div>
+    <div class="form-group">
+      <input type="email" id="teacherEmail" placeholder="શಿಕ್ಷક ઈમેલ" required>
+    </div>
+    <button onclick="addTeacher()">ઉમેરો</button>
+  </main>
+
+  <div class="footer">
+    © 2025 શ્રી પી. એમ. પટેલ હાઈસ્કૂલ | Developed with Firebase
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyALJ8xG21RcevPI2Le_3tohfu-M2gW8szc",
+      authDomain: "pm-patel-high-school.firebaseapp.com",
+      databaseURL: "https://pm-patel-high-school-default-rtdb.firebaseio.com",
+      projectId: "pm-patel-high-school",
+      storageBucket: "pm-patel-high-school.appspot.com",
+      messagingSenderId: "334539397246",
+      appId: "1:334539397246:web:8c6a67a82e2380f9a6202f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    function addTeacher() {
+      const teacherName = document.getElementById("teacherName").value;
+      const teacherEmail = document.getElementById("teacherEmail").value;
+
+      if (teacherName && teacherEmail) {
+        const teacherId = Date.now(); // Unique ID for each teacher
+        const teacherRef = ref(db, "teachers/" + teacherId);
+        set(teacherRef, {
+          name: teacherName,
+          email: teacherEmail
+        }).then(() => {
+          alert("શિક્ષક સફળતાપૂર્વક ઉમેરાઈ ગયો છે.");
+        }).catch((error) => {
+          console.error("Error adding teacher: ", error);
+          alert("ખોટું થાઈ ગયું છે.");
+        });
+      } else {
+        alert("કૃપા કરીને બધા ફિલ્ડ ભરੋ.");
+      }
+    }
+
+    // Log out the admin
+    function logout() {
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      }).catch((error) => {
+        console.error("Error logging out: ", error);
+      });
+    }
+  </script>
+</body>
+</html>

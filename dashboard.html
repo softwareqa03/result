@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="gu" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ડેશબોર્ડ - શ્રી પી. એમ. પટેલ હાઈસ્કૂલ</title>
+  
+  <!-- Optimized font loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati&display=swap" rel="stylesheet">
+  
+  <!-- Optimized CSS loading -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="styles/dashboard.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 text-gray-900">
+  <header class="bg-blue-900 text-white shadow-lg">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">ડેશબોર્ડ</h1>
+      <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors duration-200">
+        લોગઆઉટ
+      </button>
+    </div>
+  </header>
+
+  <div class="container mx-auto px-4 py-8">
+    <section id="profileSection" class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="flex items-center justify-center">
+        <div class="animate-pulse">
+          <p class="text-lg text-gray-600">લોડ થઈ રહ્યું છે...</p>
+        </div>
+      </div>
+    </section>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="dashboard-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" 
+             width="60" height="60" alt="Profile" loading="lazy"
+             class="mx-auto mb-4">
+        <h3>મારું પ્રોફાઇલ</h3>
+      </div>
+
+      <div class="dashboard-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3208/3208722.png" 
+             width="60" height="60" alt="Students" loading="lazy"
+             class="mx-auto mb-4">
+        <h3>વિદ્યાર્થીઓ</h3>
+      </div>
+
+      <a href="attendance.html" class="dashboard-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3381/3381072.png" 
+             width="60" height="60" alt="Attendance" loading="lazy"
+             class="mx-auto mb-4">
+        <h3>હાજરી</h3>
+      </a>
+
+      <a href="registration.html" class="dashboard-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135823.png" 
+             width="60" height="60" alt="Registration" loading="lazy"
+             class="mx-auto mb-4">
+        <h3>વિદ્યાર્થી નોંધણી</h3>
+      </a>
+    </main>
+  </div>
+
+  <footer class="bg-gray-100 border-t mt-12">
+    <div class="container mx-auto px-4 py-6">
+      <p class="text-center text-gray-600">
+        © 2025 શ્રી પી. એમ. પટેલ હાઈસ્કૂલ | Developed with Firebase
+      </p>
+    </div>
+  </footer>
+
+  <!-- Firebase Configuration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    // Initialize Firebase with your config
+    const app = initializeApp({
+      apiKey: "AIzaSyALJ8xG21RcevPI2Le_3tohfu-M2gW8szc",
+      authDomain: "pm-patel-high-school.firebaseapp.com", 
+      databaseURL: "https://pm-patel-high-school-default-rtdb.firebaseio.com",
+      projectId: "pm-patel-high-school",
+      storageBucket: "pm-patel-high-school.appspot.com",
+      messagingSenderId: "334539397246",
+      appId: "1:334539397246:web:8c6a67a82e2380f9a6202f"
+    });
+
+    const auth = getAuth();
+    const db = getDatabase();
+
+    // Handle authentication state changes
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        const snapshot = await get(ref(db, `users/${user.uid}`));
+        const profileSection = document.getElementById('profileSection');
+        
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          profileSection.innerHTML = `
+            <div class="text-center">
+              <img src="${data.photoURL}" alt="Profile" class="w-24 h-24 rounded-full mx-auto mb-4">
+              <h2 class="text-xl font-semibold mb-2">${data.name}</h2>
+              <p class="text-gray-600 mb-2">${data.email}</p>
+              <p class="text-sm text-gray-500">
+                છેલ્લો લોગિન: ${new Date(data.lastLogin).toLocaleString('gu-IN')}
+              </p>
+            </div>
+          `;
+        } else {
+          profileSection.innerHTML = `
+            <p class="text-center text-gray-600">યૂઝર માહિતી મળતી નથી.</p>
+          `;
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        profileSection.innerHTML = `
+          <p class="text-center text-red-600">માહિતી લોડ કરવામાં ભૂલ થઈ</p>
+        `;
+      }
+    });
+
+    // Handle logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+      }).catch(error => {
+        console.error('Logout error:', error);
+        alert('લોગઆઉટ કરવામાં ભૂલ થઈ');
+      });
+    });
+  </script>
+
+  <style>
+    .dashboard-card {
+      @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1 text-center;
+    }
+    
+    .dashboard-card h3 {
+      @apply text-xl font-semibold text-gray-800;
+    }
+  </style>
+</body>
+</html>
+
+<section id="resumeSection" class="bg-white rounded-lg shadow-md p-6 mb-8">
+  <header class="text-center mb-4">
+    <h2 class="text-2xl font-bold text-gray-800">Resume</h2>
+  </header>
+  <article class="mb-4">
+    <h3 class="text-xl font-semibold text-gray-700">Personal Information</h3>
+    <p class="text-gray-600">Name: John Doe</p>
+    <p class="text-gray-600">Email: johndoe@example.com</p>
+  </article>
+  <article class="mb-4">
+    <h3 class="text-xl font-semibold text-gray-700">Education</h3>
+    <p class="text-gray-600">B.Sc. in Computer Science</p>
+  </article>
+  <article class="mb-4">
+    <h3 class="text-xl font-semibold text-gray-700">Skills</h3>
+    <ul class="list-disc list-inside text-gray-600">
+      <li>JavaScript</li>
+      <li>React</li>
+      <li>Node.js</li>
+    </ul>
+  </article>
+  <article>
+    <h3 class="text-xl font-semibold text-gray-700">Experience</h3>
+    <p class="text-gray-600">Software Developer at XYZ Corp.</p>
+  </article>
+</section>

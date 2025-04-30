@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyALJ8xG21RcevPI2Le_3tohfu-M2gW8szc",
+            authDomain: "pm-patel-high-school.firebaseapp.com",
+            databaseURL: "https://pm-patel-high-school-default-rtdb.firebaseio.com",
+            projectId: "pm-patel-high-school",
+            storageBucket: "pm-patel-high-school.appspot.com",
+            messagingSenderId: "334539397246",
+            appId: "1:334539397246:web:8c6a67a82e2380f9a6202f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        window.registerStudent = async () => {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await set(ref(db, 'students/' + user.uid), {
+                    name: name,
+                    email: email
+                });
+
+                document.getElementById('message').textContent = 'Registration successful!';
+            } catch (error) {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-blue-500 text-white p-4">
+        <h1 class="text-xl">Student Registration</h1>
+    </header>
+    <main class="p-4">
+        <form class="bg-white p-4 rounded shadow">
+            <div class="mb-4">
+                <label for="name" class="block text-gray-700">Name</label>
+                <input type="text" id="name" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700">Email</label>
+                <input type="email" id="email" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700">Password</label>
+                <input type="password" id="password" class="w-full p-2 border rounded" required>
+            </div>
+            <button type="button" onclick="registerStudent()" class="bg-blue-500 text-white p-2 rounded">Register</button>
+            <p id="message" class="mt-4 text-red-500"></p>
+        </form>
+    </main>
+    <footer class="bg-blue-500 text-white p-4 text-center">
+        © 2025 Shri P. M. Patel High School
+    </footer>
+</body>
+</html>
